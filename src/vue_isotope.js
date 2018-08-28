@@ -172,10 +172,10 @@
           }).flatten().value();
         },
 
-        sort(name, sortAscending = false) {
+        sort(name, sortAscending) {
           let sort = name
           if (_.isString(name)) {
-            sort = { sortBy: name, sortAscending }
+            sort = { sortBy: name, sortAscending: Boolean(sortAscending) }
           }
           this.arrange(sort)
           this.$emit("sort", name)

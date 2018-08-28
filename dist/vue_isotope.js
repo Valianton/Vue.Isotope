@@ -192,12 +192,10 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             });
           }).flatten().value();
         },
-        sort: function sort(name) {
-          var sortAscending = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-
+        sort: function sort(name, sortAscending) {
           var sort = name;
           if (_.isString(name)) {
-            sort = { sortBy: name, sortAscending: sortAscending };
+            sort = { sortBy: name, sortAscending: Boolean(sortAscending) };
           }
           this.arrange(sort);
           this.$emit("sort", name);
@@ -269,16 +267,13 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
     return isotopeComponent;
   }
 
-  if ((typeof exports === "undefined" ? "undefined" : _typeof(exports)) == "object") {
-    var _ = require("lodash"),
-        Isotope = require("isotope-layout");
+  if (typeof exports == "object") {
+    var _ = require("lodash"), Isotope = require("isotope-layout");
     module.exports = buildVueIsotope(_, Isotope);
   } else if (typeof define == "function" && define.amd) {
-    define(['lodash', 'Isotope'], function (_, Isotope) {
-      return buildVueIsotope(_, Isotope);
-    });
-  } else if (window.Vue && window._ && window.Isotope) {
+    define(['lodash', 'Isotope'], function (_, Isotope) { return buildVueIsotope(_, Isotope); });
+  } else if ((window.Vue) && (window._) && (window.Isotope)) {
     var isotope = buildVueIsotope(window._, window.Isotope);
-    Vue.component('isotope', isotope);
+    Vue.component('isotope', isotope)
   }
 })();
