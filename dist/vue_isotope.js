@@ -1,7 +1,5 @@
 "use strict";
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 (function () {
@@ -50,7 +48,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         var prevChildren = this.prevChildren = this.children;
         var rawChildren = this.$slots.default || [];
         var children = this.children = [];
-        var removedItems = this.removedItems = [];
+        var removedIndex = this.removedIndex = [];
 
         rawChildren.forEach(function (elt) {
           return addClass(elt, _this.itemSelector);
@@ -77,7 +75,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             var _c = prevChildren[_i];
             if (!map[_c.key]) {
               displayChildren.splice(_i, 0, _c);
-              removedItems.push(_c);
+              removedIndex.push(_i);
             }
           }
         }
@@ -132,16 +130,16 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         this._oldChidren = Array.prototype.slice.call(this.$el.children);
       },
       updated: function updated() {
+        var _this3 = this;
+
         if (!this.iso) {
           return;
         }
 
         var newChildren = [].concat(_toConsumableArray(this.$el.children));
         var added = _.difference(newChildren, this._oldChidren);
-        var removed = this.removedItems.map(function (item) {
-          return newChildren.find(function (child) {
-            return child === item.elm;
-          });
+        var removed = this.removedIndex.map(function (index) {
+          return _this3.$el.children[index];
         });
 
         this.cleanupNodes();
@@ -159,59 +157,54 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
       methods: {
         cleanupNodes: function cleanupNodes() {
-          var _this3 = this;
+          var _this4 = this;
 
-          this.removedItems.reverse();
-          this.removedItems.forEach(function (item) {
-            var index = _this3._vnode.children.findIndex(function (child) {
-              return child === item;
-            });
-            _this3._vnode.children.splice(index, 1);
+          this.removedIndex.reverse();
+          this.removedIndex.forEach(function (index) {
+            return _this4._vnode.children.splice(index, 1);
           });
         },
         link: function link() {
-          var _this4 = this;
+          var _this5 = this;
 
           var slots = this.$slots.default || [];
           slots.forEach(function (slot, index) {
             var elmt = slot.elm;
-            if (elmt) elmt.__underlying_element = { vm: _this4.list[index], index: index };
+            if (elmt) elmt.__underlying_element = { vm: _this5.list[index], index: index };
           });
         },
         listen: function listen() {
-          var _this5 = this;
+          var _this6 = this;
 
           this._listeners = _(this.compiledOptions.getSortData).map(function (sort) {
-            return _.map(_this5.list, function (collectionElement, index) {
-              return _this5.$watch(function () {
+            return _.map(_this6.list, function (collectionElement, index) {
+              return _this6.$watch(function () {
                 return sort(collectionElement);
               }, function () {
-                _this5.iso.updateSortData();
-                _this5.iso._requestUpdate();
+                _this6.iso.updateSortData();
+                _this6.iso._requestUpdate();
               });
             });
           }).flatten().value();
         },
         sort: function sort(name) {
-          var sortAscending = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-
           var sort = name;
           if (_.isString(name)) {
-            sort = { sortBy: name, sortAscending: sortAscending };
+            sort = { sortBy: name };
           }
           this.arrange(sort);
           this.$emit("sort", name);
         },
         buildFilterFunction: function buildFilterFunction(name) {
-          var _this6 = this;
+          var _this7 = this;
 
           var filter = this._isotopeOptions.getFilterData[name];
           this._filterlistener = this.$watch(function () {
-            return _.map(_this6.list, function (el, index) {
-              return _this6.options.getFilterData[name](el, index);
+            return _.map(_this7.list, function (el, index) {
+              return _this7.options.getFilterData[name](el, index);
             });
           }, function () {
-            _this6.iso._requestUpdate();
+            _this7.iso._requestUpdate();
           });
           return filter;
         },
@@ -269,7 +262,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
     return isotopeComponent;
   }
 
-  if ((typeof exports === "undefined" ? "undefined" : _typeof(exports)) == "object") {
+  if (typeof exports == "object") {
     var _ = require("lodash"),
         Isotope = require("isotope-layout");
     module.exports = buildVueIsotope(_, Isotope);
