@@ -42,7 +42,7 @@
         const prevChildren = this.prevChildren = this.children
         const rawChildren = this.$slots.default || []
         const children = this.children = []
-        const removedIndex = this.removedIndex = []
+        const removedItems = this.removedItems = []
 
         rawChildren.forEach(elt => addClass(elt, this.itemSelector))
 
@@ -67,7 +67,7 @@
             const c = prevChildren[i]
             if (!map[c.key]) {
               displayChildren.splice(i, 0, c)
-              removedIndex.push(i)
+              removedItems.push(c)
             }
           }
         }
@@ -127,7 +127,7 @@
 
         const newChildren = [...this.$el.children]
         const added = _.difference(newChildren, this._oldChidren)
-        const removed = this.removedIndex.map(index => this.$el.children[index])
+        const removed = this.removedItems.map(item => newChildren.find(child => child === item.elm))
 
         this.cleanupNodes()
         this.link()
@@ -144,8 +144,11 @@
 
       methods: {
         cleanupNodes() {
-          this.removedIndex.reverse()
-          this.removedIndex.forEach(index => this._vnode.children.splice(index, 1))
+          this.removedItems.reverse()
+          this.removedItems.forEach(item => {
+            const index = this._vnode.children.findIndex(child => child === item)
+            this._vnode.children.splice(index, 1)
+          })
         },
 
         link() {
@@ -169,10 +172,10 @@
           }).flatten().value();
         },
 
-        sort(name) {
+        sort(name, sortAscending = false) {
           let sort = name
           if (_.isString(name)) {
-            sort = { sortBy: name }
+            sort = { sortBy: name, sortAscending }
           }
           this.arrange(sort)
           this.$emit("sort", name)
